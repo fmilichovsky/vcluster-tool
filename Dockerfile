@@ -1,20 +1,18 @@
+FROM mcr.microsoft.com/azure-cli:2.9.1
 
-FROM alpine:latest
+RUN apk --no-cache add curl
 
-# Dpendencies.
-RUN apk --no-cache add \
-    ca-certificates \
-    curl \
-    jq \
-    bash
+# kubectl
+RUN curl -L -o kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install -c -m 0755 kubectl /usr/local/bin/kubectl
+RUN rm -f kubectl
 
-RUN apk --no-cache add azure-cli
+# vcluster CLI
+RUN curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
+RUN install -c -m 0755 vcluster /usr/local/bin/vcluster
+RUN rm -f vcluster
 
-RUN apk --no-cache add kubectl
-
-RUN curl -s https://fluxcd.io/install.sh | sudo FLUX_VERSION=2.1.2 bash
-
-RUN curl -sL https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64 -o /usr/local/bin/vcluster
-RUN chmod +x /usr/local/bin/vcluster
+# FluxCLI
+RUN curl -s https://fluxcd.io/install.sh | FLUX_VERSION=2.1.2 bash
 
 CMD ["bash"]
